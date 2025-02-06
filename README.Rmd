@@ -1,8 +1,9 @@
 ---
 title: "Lab 05 - Data Wrangling"
 output:
-  github_document: default
-
+  pdf_document: default
+  html_document:
+    html_preview: false
 link-citations: true
 ---
 
@@ -190,7 +191,21 @@ Knit the document, commit your changes, and save it on GitHub. Don't forget to a
 Just like the previous question, you are asked to identify what is the most representative, the median, station per state. This time, instead of looking at one variable at a time, look at the euclidean distance. If multiple stations show in the median, select the one located at the lowest latitude.
 
 ```{r}
+station_med[, temp_50 := quantile(temp, 0.5, na.rm = TRUE), by = STATE]
+station_med[, wind.sp_50 := quantile(wind.sp, 0.5, na.rm = TRUE), by = STATE]
 
+station_med[, eudist := sqrt(
+  (temp - temp_50)^2 + (wind.sp - wind.sp_50)^2
+)]
+
+id_station <- station_med[, .SD[which.min(eudist)], by = STATE]
+
+id_station <- merge(
+  x = id_station,
+  y = stations,
+  all.x = TRUE, all.y = FALSE,
+  by.x = "USAFID", by.y = "USAF"
+)
 ```
 
 Knit the doc and save it on GitHub.
